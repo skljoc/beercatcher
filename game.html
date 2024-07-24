@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beer Catcher Game</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #87CEEB;
+        }
+        canvas {
+            display: block;
+            background: #F4A460;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+    <script>
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const bottleImage = new Image();
+        bottleImage.src = 'https://example.com/beer-bottle.png'; // Replace with a URL to a beer bottle image
+
+        const manImage = new Image();
+        manImage.src = 'https://example.com/man.png'; // Replace with a URL to a man image
+
+        let bottles = [];
+        let man = {
+            x: canvas.width / 2 - 50,
+            y: canvas.height - 100,
+            width: 100,
+            height: 100,
+            speed: 20
+        };
+        let score = 0;
+        let gameDuration = 20000; // 20 seconds
+
+        function startGame() {
+            score = 0;
+            bottles = [];
+            man.x = canvas.width / 2 - 50;
+            const gameInterval = setInterval(updateGame, 20);
+            const bottleInterval = setInterval(() => {
+                let bottle = {
+                    x: Math.random() * (canvas.width - 50),
+                    y: 0,
+                    width: 50,
+                    height: 100,
+                    speed: 5
+                };
+                bottles.push(bottle);
+            }, 1000);
+
+            setTimeout(() => {
+                clearInterval(gameInterval);
+                clearInterval(bottleInterval);
+                alert("Game Over! You caught " + score + " bottles.");
+            }, gameDuration);
+        }
+
+        function updateGame() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Move and draw bottles
+            for (let i = 0; i < bottles.length; i++) {
+                bottles[i].y += bottles[i].speed;
+                ctx.drawImage(bottleImage, bottles[i].x, bottles[i].y, bottles[i].width, bottles[i].height);
+
+                // Check if bottle is caught
+                if (bottles[i].y + bottles[i].height > man.y && bottles[i].x + bottles[i].width > man.x && bottles[i].x < man.x + man.width) {
+                    score++;
+                    bottles.splice(i, 1);
+                    i--;
+                } else if (bottles[i].y > canvas.height) {
+                    bottles.splice(i, 1);
+                    i--;
+                }
+            }
+
+            // Draw man
+            ctx.drawImage(manImage, man.x, man.y, man.width, man.height);
+
+            // Display score
+            ctx.fillStyle = "black";
+            ctx.font = "30px Arial";
+            ctx.fillText("Score: " + score, 10, 30);
+        }
+
+        window.addEventListener('keydown', function (e) {
+            if (e.key === 'ArrowLeft' && man.x > 0) {
+                man.x -= man.speed;
+            } else if (e.key === 'ArrowRight' && man.x < canvas.width - man.width) {
+                man.x += man.speed;
+            }
+        });
+
+        window.onload = startGame;
+    </script>
+</body>
+</html>
